@@ -1,0 +1,26 @@
+https://api.twitter.com/1.1/search/tweets.json
+
+https://stream.twitter.com/1.1/statuses/sample.json
+
+https://developer.twitter.com/en
+
+https://api.sampleurl.org/get
+
+https://graph.facebook.com/v2.8/
+
+https://console.developers.google.com/apis/
+
+https://www.googleapis.com/youtube/v3/search
+
+https://www.googleapis.com/youtube/v3/commentThreads
+
+https://developers.pinterest.com/
+
+https://nlp.stanford.edu/software/CRF-NER.shtml#Download
+
+https://stanfordnlp.github.io/CoreNLP/
+
+https://www.youtube.com/channel/UC-2Y8dQb0S6DtpxNgAKoJKA
+
+
+Icons made by <a href="https://www.flaticon.com/authors/prosymbols" title="Prosymbols">Prosymbols</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
