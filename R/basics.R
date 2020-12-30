@@ -155,7 +155,6 @@ typeof(lapply(l, mean))
 sapply(l ,mean)
 typeof(sapply(l, mean))
 
-
 data <- 1:30
 data
 
