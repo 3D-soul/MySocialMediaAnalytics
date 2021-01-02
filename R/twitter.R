@@ -256,5 +256,3 @@ wordcloud(words = namesCorpus,
           colors = myColor)
 
 
-
-

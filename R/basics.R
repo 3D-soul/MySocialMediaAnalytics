@@ -155,6 +155,7 @@ typeof(lapply(l, mean))
 sapply(l ,mean)
 typeof(sapply(l, mean))
 
+
 data <- 1:30
 data
 
@@ -190,4 +191,7 @@ ggplot(data=iris, aes(x=Species, y=Sepal.Length)) +
     stat_summary(fun=mean, geom="point", shape=5, size=4)+
     theme_bw()
 
+## Others
+installed.packages(lib.loc=)
+library()
 
