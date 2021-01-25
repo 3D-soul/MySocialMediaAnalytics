@@ -7,6 +7,7 @@ class ForumTeamspeedSpider(scrapy.Spider):
     name = "teamspeed"
     page_num=2
     start_urls = [
+        ## gadgets and gaming
         "https://teamspeed.com/forums/gadgets-electronics-home-theater-gaming/?daysprune=-1"
     ]
 
