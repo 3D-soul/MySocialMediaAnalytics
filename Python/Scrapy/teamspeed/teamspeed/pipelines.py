@@ -16,10 +16,14 @@ class TeamspeedPipeline:
         self.create_table()
 
         self.client = MongoClient("mongodb://127.0.0.1:27017/")
-        self.collection = self.client["scrapy-db"].teamspeed
+        # self.collection = self.client["scrapy-db"].teamspeed_gadgets_and_gaming
+        # self.collection = self.client["scrapy-db"].teamspeed_travel_hotels_and_food
+        self.collection = self.client["scrapy-db"].teamspeed_photography_and_art
 
     def create_connection(self):
-        self.conn = sqlite3.connect("./data/teamspeed.db")
+        # self.conn = sqlite3.connect("./data/teamspeed-gadgets-and-gaimng.db")
+        # self.conn = sqlite3.connect("./data/teamspeed-travel-hotels-and-food.db")
+        self.conn = sqlite3.connect("./data/teamspeed-photography_and_art.db")
         self.cur = self.conn.cursor()
 
     def create_table(self):
