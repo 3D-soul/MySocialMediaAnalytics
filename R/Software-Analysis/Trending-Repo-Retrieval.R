@@ -1,5 +1,6 @@
 library(gh)
 library(dplyr)
+library(httr)
 library(jsonlite)
 
 
@@ -17,17 +18,20 @@ DataFramefromCall <- function(x) {
     data <- jsonlite::fromJSON(x)
     items <- data$items
     req_names <- c("id", "name", "full_name", "size", "open_issues",
+                   'fork', 'stargazers_count', 'watchers', 'forks',
                    "language", "has_issues", "has_downloads", "has_wiki",
                    "has_page", "created_at", "updated_at", "pushed_at", 
                    "url", "description")
     
     mynames <- c()
     for (name in req_names){
-        if (name %in% colnames(tmp2)){
+        if (name %in% colnames(items)){
             mynames <- c(mynames, name)
         }
     }
+    
     items <- items[,mynames]
+    
     Sys.sleep(5)
     return(data.frame(items))
 } 
@@ -51,7 +55,7 @@ get.trending.repositories <- function(timeline.dates, auth.id, auth.pwd){
         query <- paste0("q=created:%22", start_date, "%20..%20", end_date, 
                         "%22%20stars:%3E=500")
         url <- paste0(base_url, query, arg_sep, api_id_param, arg_sep, api_pwd_param)
-        # res <- fromJSON(url)
+ 
         firstCall <- GET(paste(url)) %>% content()
         total_repos <- min(firstCall$total_count, 1000)
         number_calls <- ceiling(total_repos/per_page)
@@ -62,12 +66,41 @@ get.trending.repositories <- function(timeline.dates, auth.id, auth.pwd){
         for (i in 1:number_calls) {
             top.repos.df <- rbind(top.repos.df, DataFramefromCall(api_calls[i]))
             Sys.sleep(2)
+        
         }
         Sys.sleep(3)
         setTxtProgressBar(pb, i+1)
     }
     print("---- FINISHED ---")
     return(top.repos.df)
+}
+
+loop_to_get_repo_data <- function(){
+    i <- 0
+    v <- 1
+    for (date in dates){
+        if(i%%2 == 0){
+            req_dates <- c(date, dates[v+1])
+            tmp_repos <- get.trending.repositories(timeline.dates = req_dates,
+                                                   auth.id = auth.id, auth.pwd = auth.pwd)
+            Sys.sleep(5)
+            
+            tmp <- dim(tmp_repos)
+
+            print(paste("Temporarily downloaded", paste(tmp[1], "x", tmp[2])))
+
+            trending_repos <- rbind(trending_repos, tmp_repos)
+            
+            tmp <- dim(trending_repos)
+
+            print(paste("Final data dimensions", paste(tmp[1], "x", tmp[2])))
+            
+            Sys.sleep(5)
+        }
+        i = i + 1
+        v = v + 1
+    }
+    return(trending_repos)
 }
 
 auth.id <- GITHUB_CLIENT_ID
@@ -86,35 +119,39 @@ dates <- c('2018-01-01', '2018-03-31',
            '2020-07-01', '2020-09-30',
            '2020-10-01', '2020-12-31')
 
+trending_repos <- data.frame(stringsAsFactors = F)
 
-tmp_repos <- get.trending.repositories(timeline.dates = dates[23:24], 
-                                        auth.id = auth.id, auth.pwd = auth.pwd)
-
-# tmp_repos
-
-dim(tmp_repos)
-head(tmp_repos$created_at)
-
-# trending_repos <- data.frame(stringsAsFactors = F)
-
-trending_repos <- rbind(trending_repos, tmp_repos)
-
-dim(trending_repos)
-
-head(trending_repos)
+trending_repos <- loop_to_get_repo_data()
 
 typeof(trending_repos)
 
 trending_repos_df <- data.frame(trending_repos)
+trending_repos_df <- as_tibble(trending_repos_df)
 trending_repos_df
 
-trending_repos_df <- as_tibble(trending_repos_df)
 
+# saving data
 f <- file("./data/trending-repo.csv", "wb")
 write.csv(trending_repos_df, file=f, eol="\n")
 close(f)
 
-write.csv("./data/trending-repo.csv", trending_repos_df)
+# loading data
+trending_repos_df <- read.csv("./data/trending-repo.csv")
+trending_repos_df <- as_tibble(trending_repos_df)
+trending_repos_df
+
+
+
+
+
+
+
+
+paste(tmp[1], "x",  tmp[2])
+
+
+
+
 
 
 
