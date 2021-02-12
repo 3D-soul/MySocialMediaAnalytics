@@ -147,13 +147,6 @@ trending_repos_df
 
 
 
-paste(tmp[1], "x",  tmp[2])
-
-
-
-
-
-
 
 
 

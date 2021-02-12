@@ -277,6 +277,371 @@ ggplot(new_corr_df, aes(x=total_stargazers, y =total_open_issues, color=repo_hea
     theme_ipsum_rc(axis_title_just = 0.5) + 
     theme(plot.title = element_text(hjust=0.5))
 
+### --------------------------------------------------------------------------------
+## ANALYZING LANGUAGE TRENDS
+# aggeregate repos count by language
+repo_languages <- aggregate(trending_repos_df$language, 
+                        by = list(trending_repos_df$language), length)
+
+colnames(repo_languages) <- c("Languages", "Count")
+
+# get top 25 languages in GitHub
+top_languages_counts <- arrange(repo_languages, desc(Count))[1:25,]
+top_languages_counts
+
+
+# plotting Language count
+ggplot(top_languages_counts, aes(x=Languages, y=Count, fill=Languages)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_text(aes(label=Count),
+            vjust=-0.3,
+            position=position_dodge(0.9), size=3) +
+  scale_color_ipsum() +
+  labs(x="Language", y="Repository Count",
+       title = "Top Trending Languages in GitHub") +
+  theme_ipsum_rc(grid="y", axis_title_just = 0.5) +
+  theme(legend.position="NA",
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        plot.title = element_text(hjust=0.5))
+  
+"
+From the generated plot, we can see that Python and JavaScript are the clear
+winners in the war of trending languages!
+
+"  
+
+# aggregate repo counts by language over time
+trending_repos_df$created_year <- format(as.Date(trending_repos_df$created_at), "%Y")
+
+top_languages_by_year <- aggregate(trending_repos_df$language, 
+                                    by = list(trending_repos_df$created_year, 
+                                              trending_repos_df$language), length)
+
+colnames(top_languages_by_year) <- c("Year", "Language", "Count")
+
+top_languages = arrange(repo_languages, desc(Count))[1:15, c("Languages")]
+
+top_languages_by_year <- top_languages_by_year[top_languages_by_year$Language %in% top_languages,]
+
+# Visualize data
+ggplot(top_languages_by_year, aes(x=Language, y=Count, fill=Year)) +
+  geom_bar(stat="identity", position = "dodge") +
+  geom_text(aes(label=Count),
+            vjust=-0.3,
+            position = position_dodge(0.9), size=2.5) +
+  scale_color_ipsum() +
+  labs(x="Language", y="Repositories Count",
+       title="Trending Language in GitHub over time") +
+  theme_ipsum_rc(grid="Y", axis_title_just = 0.5) +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        plot.title = element_text(hjust=0.5))
+
+"
+Every single language had a decrease in the count but onlt Python had a
+slight increase
+"
+
+## Languages with most open issues
+# aggregate mean open issues per language
+repo_issues <- aggregate(trending_repos_df$open_issues,
+                         by=list(trending_repos_df$language), mean)
+
+colnames(repo_issues) <- c("Language", "Issues")
+
+repo_issues$Issues <- round(repo_issues$Issues, 2)
+
+top_issues_language_counts <- arrange(repo_issues, desc(Issues))[1:25,] 
+
+# Visualize data
+ggplot(top_issues_language_counts, aes(x=Language, y=Issues, fill=Language)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_text(aes(label=Issues),
+            vjust=-0.3,
+            position=position_dodge(0.9),size=3) +
+  scale_color_ipsum() +
+  labs(x="Language", y="Issues",
+       title = "Language with most open issues on GitHub",
+       subtitle = "top language repo with highest mean open issue count") +
+  theme_ipsum_rc(axis_title_just = 0.5) +
+  theme(legend.position = "NA",
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust=0.5))
+
+"
+CodeQl and V language are at the top mean open issues count
+"
+
+## Languages with most open issues over time
+# aggregate mean issues by language over time
+top_issues_language_by_year <- aggregate(trending_repos_df$open_issues,
+                                         by = list(trending_repos_df$created_year,
+                                                   trending_repos_df$language), mean)
+
+colnames(top_issues_language_by_year) <- c("Year", "Language", "Issues")
+
+top_languages <- arrange(repo_issues, desc(Issues))[1:10, c("Language")]
+
+top_issues_language_by_year <- top_issues_language_by_year[
+  top_issues_language_by_year$Language %in% top_languages,]
+
+top_issues_language_by_year$Issues <- round(top_issues_language_by_year$Issues, 2)
+
+# visualize data
+ggplot(top_issues_language_by_year, aes(x=Language, y=Issues, fill=Year)) +
+  geom_bar(stat="identity", position = "dodge") +
+  geom_text(aes(label=Issues),
+            vjust=-0.3,
+            posiiton=position_dodge(0.9), size=2) +
+  scale_color_ipsum()+
+  labs(x="Language", y="Issues", 
+       title="Language with most open issues in GitHub oevr time",
+       subtitle = "top languages repositories with highest mean open issues over time") +
+  theme_ipsum_rc(axis_title_just = 0.5)+
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle=90, hjust=1),
+        plot.title = element_text(hjust=0.5),
+        plot.subtitle = element_text(hjust=0.5))
+"
+- Languages like V and System Verilog had more issues in 2019 
+- Languages like CodeQl, cuda and Dockerfile had more issues in 2018
+"
+
+## Languages with most helpful repo
+# here we can use both has_pages and has_wiki
+# aggregate helpful repo by language
+helpful_repo_language <- aggregate(trending_repos_df$has_wiki, 
+                                   by=list(trending_repos_df$language), sum)
+
+colnames(helpful_repo_language) <- c("Language", "Count")
+
+top_helpful_repos <- arrange(helpful_repo_language, desc(Count))[1:25,]
+
+# plot top helpful repos
+ggplot(top_helpful_repos, aes(x=Language, y=Count, fill=Language)) +
+  geom_bar(stat="identity", position = "dodge")+
+  geom_text(aes(label=Count),
+            vjust=-0.3,
+            position = position_dodge(0.9), size=3) +
+  scale_color_ipsum()+
+  labs(x="Language", y="Count",
+       title="Most helpful repositiories in GitHub by Language")+
+  theme_ipsum_rc(axis_title_just = 0.5)+
+  theme(legend.position = "NA",
+        axis.text.x = element_text(angle = 90, hjust=1),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+"
+Again Python and JavaScript are the top language-based repo with wikis
+"
+
+## Languages with  highest popularity score
+# Popularity Score = (2 x forks) + stars
+# compute popularity score
+trending_repos_df$popularity_score <- ((trending_repos_df$forks * 2) + 
+                                      trending_repos_df$stargazers_count)
+
+# aggregate repository popularity scores by language
+popular_repo_languages <- aggregate(trending_repos_df$popularity_score,
+                                    by=list(trending_repos_df$language), sum)
+
+
+colnames(popular_repo_languages) <- c("Language", "Popularity")
+
+popular_repo_languages$Popularity <- round(popular_repo_languages$Popularity, 1)
+
+top_popular_repos <- arrange(popular_repo_languages, desc(Popularity))[1:25,]
+
+# plot top popular languages
+ggplot(top_popular_repos, aes(x=Language, y=Popularity)) +
+  geom_bar(stat="identity", position="dodge", fill="steelblue") +
+  geom_text(aes(label=Popularity),
+            vjust=-0.3,
+            position=position_dodge(0.9), size=2.5) +
+  scale_color_ipsum()+
+  labs(x="Language", y="Popularity",
+       title="Language with most Popularity Score in GitHub",
+       subtitle = "top language repositories with highest popularity score") +
+  theme_ipsum_rc(axis_title_just = 0.5) +
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+"
+Python, Javascript and Java are the most popular languages
+"  
+  
+## Language Correlations
+# get repository owner and language
+trending_repos_df$owner <- sapply(strsplit(trending_repos_df$full_name,"/"), "[", 1)
+df <- trending_repos_df[, c("owner", "language")]
+df_pivot <- data.table(df)
+
+# create owner-language usage matrix
+owner_lang_matrix <- dcast.data.table(df_pivot, owner~language,
+                                      fun.aggregate = length,
+                                      value.var = "language")
+
+owner_lang_df <-as.data.frame(owner_lang_matrix)
+
+View(owner_lang_df)
+
+# build a language correlation matrix
+lang_mat <- owner_lang_df[, 2:length(colnames(owner_lang_df))]
+lang_corr <- cor(lang_mat)
+
+# transform language correlations
+diag(lang_corr) < NA
+lang_corr[upper.tri(lang_corr)] <- NA
+lang_corr_final <- melt(lang_corr)
+
+lang_corr_final
+
+# get highly correlated langauges
+filtered_corr <- lang_corr_final[complete.cases(lang_corr_final),]
+filtered_corr <- filtered_corr[which(filtered_corr$value != 1),]
+
+tmp <- filtered_corr[which(filtered_corr$value >= 0.4), ]
+tmp2 <- filtered_corr[which(filtered_corr$value <= -0.03), ]
+
+filtered_corr_final <- rbind(tmp, tmp2)
+
+View(filtered_corr_final)
+
+"
+- There are no highly correlated languages
+- We can see that Nim and Boo, GLSL and GDScript are quite correlated
+- Rust and JavaScript are very slightly negatively correlated
+"
+
+###----------------------------------------------------------------------------------------
+## ANALYZING USER TRENDS
+# get repo user
+trending_repos_df$user <- sapply(strsplit(trending_repos_df$full_name, "/"), "[", 1)
+
+# aggregate repository counts by users
+repo_users <- aggregate(trending_repos_df$user,
+                        by=list(trending_repos_df$user), length)
+
+colnames(repo_users) <- c("User", "Count")
+
+top_users_counts <- arrange(repo_users, desc(Count))[1:25,]
+
+# plot top 25 most contributing users
+ggplot(top_users_counts, aes(x=User, y=Count, fill=User)) +
+  geom_bar(stat="identity", position="dodge") +
+  coord_flip()+
+  geom_text(aes(label=Count),
+            vjust=0.3,
+            hjust=-0.1,
+            position=position_dodge(0.9), size=3) +
+  scale_color_ipsum() +
+  labs(x="User", y="Count",
+       title="Top contirbuting user on GitHub",
+       subtitle = "Users with the most trending repositories") +
+  theme_ipsum_rc(axis_title_just = 0.5) +
+  theme(legend.position = "NA",
+        plot.title = element_text(hjust=0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+"
+microsoft, google, facebooksearch are top contributing users
+"
+
+## ANALYZE USER ACTIVITY METRICS
+# compute derived metrics
+trending_repos_df$user <- sapply(strsplit(trending_repos_df$full_name, "/"), "[", 1)
+
+trending_repos_df$create_age <- as.integer(difftime(Sys.Date(), 
+                                                    trending_repos_df$created_at,
+                                                    units=c("days")))
+trending_repos_df$update_age <- as.integer(difftime(Sys.Date(), 
+                                                    trending_repos_df$updated_at,
+                                                    units = c("days")))
+
+# build aggregations
+subset_df <- trending_repos_df[c("id", "user", "size","stargazers_count", "forks",
+                                 "open_issues", "create_age","update_age")]
+stats_df <- sqldf("select user, count(*) as repo_count, 
+                  avg(size) as mean_repo_size,
+                  sum(stargazers_count) as total_stargazers,
+                  sum(forks) as total_forks,
+                  sum(open_issues) as total_open_issues,
+                  avg(create_age) as mean_create_age,
+                  avg(update_age) as mean_update_age 
+                  from subset_df group by user
+                  order by repo_count desc")
+
+# filter and view stats
+top_users_stats <- stats_df[1:20,]
+colnames(top_users_stats) <- c("User", "Total_Repos", "Avg.Repo_Size", "Total_Stargazers", "Total_Forks", 
+             "Total_Open_Issues", "Avg.Repo_Create_Age", "Avg.Repo_Update_Age")
+
+# scale metric attributes
+scale_col <- function(x){
+  round((x-min(x)/max(x)-min(x)),2)
+}
+scaled_stats <- cbind(top_users_stats[,1],
+                      as.data.frame(apply(top_users_stats[2:8],
+                                          2, scale_col)))
+
+colnames(scaled_stats)[1] <- "User"
+scaled_stats_tf <- melt(scaled_stats, id="User") 
+colnames(scaled_stats_tf) <- c("User", "Metric", "Value")
+
+# plot user activity metrics
+ggplot(data=scaled_stats_tf, aes(x=Metric, y=User)) +
+  geom_tile(aes(fill=Value)) +
+  geom_text(aes(label=Value), size=3) +
+  scale_fill_gradient(low = "#FFB607", high = "#DB3D00") +
+  theme_ipsum_rc(axis_title_just = 0.5) +
+  labs(x="User", y="Metric",
+       title="User Activity Metric Heatmap",
+       subtitle="Anlayzing trending user activity metrics on GitHub") +
+  theme(legend.position = "NA",
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust=0.5))
+
+## adding proportions and Intensity
+req_df <- top_users_stats %>%
+  group_by("User") 
+
+req_df <- cbind( req_df[1], apply(req_df[2:8], 2, function(x) round(x/max(x), 2)) ) 
+
+scaled_stats_tf <- melt(req_df, id="User")
+colnames(scaled_stats_tf) <- c("User", "Metric", "Value")
+
+# plot user activity metrics
+ggplot(data=scaled_stats_tf, aes(x=Metric, y=User)) +
+  geom_tile(aes(fill=Value)) +
+  geom_text(aes(label=Value), size=3) +
+  scale_fill_gradient(low = "#FFB607", high = "#DB3D00") +
+  theme_ipsum_rc(axis_title_just = 0.5) +
+  labs(x="User", y="Metric",
+       title="User Activity Metric Heatmap",
+       subtitle="Anlayzing trending user activity metrics on GitHub") +
+  theme(legend.position = "NA",
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust=0.5))
+
+"
+- Amoung the top 20 google occurs more time
+- Microsoft has highest no. of repos, stargazers, open issues
+- United Technology has high proportion of Repo Size
+- Secondly, Alibaba and dotnet has more no. of forks and open issues resp.  
+- Apart from these Tensor Flow, Tecent, Alibaba also has more repos, forks and stargazers
+- The create age ad update age are not less than 0.6 and 0.8 repsectively for all 20
+"
+
+
+
+
+
+
 
 
 
