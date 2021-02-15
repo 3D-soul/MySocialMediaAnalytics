@@ -637,12 +637,3 @@ ggplot(data=scaled_stats_tf, aes(x=Metric, y=User)) +
 - The create age ad update age are not less than 0.6 and 0.8 repsectively for all 20
 "
 
-
-
-
-
-
-
-
-
-
