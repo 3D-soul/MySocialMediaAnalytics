@@ -15,7 +15,6 @@ find_names <- function(List){
     for (name in current_names){
        if (!(name %in% mynames)){
            mynames <- c(mynames, name)
-           # tmp_list[i]$row[name] <- NA
         }
     }
   }
@@ -98,7 +97,7 @@ get_non_na_names <- function(df){
 }
 
 get_non_na_df <- function(df){
-  req_names <- get_non_na_names(eng_postsDF) 
+  req_names <- get_non_na_names(df) 
   req_names
   
   idx <- c()
@@ -169,7 +168,7 @@ get_final_df <- function(df){
   
   final_df <- bind_cols(df1, df2)
    
-  return (final_df[complete.cases(final_df),])
+  return (final_df)
 }
 
 ## correcting the type of columns in non_na_df
@@ -181,20 +180,6 @@ set_col_type <- function(df){
     
     if (grepl("date", tolower(name))){
       df[name] <- lapply(df[name], ymd_hms)
-    }
-    
-    if (name == "Tags"){
-      
-      df$taglist <- lapply(str_split(df$Tags, "<|>"), function(x){x %>% unlist()}) %>%
-                     lapply(., function(x) x[x != ""])
-      
-      tmp_col <- c()
-      for (i in 1:length(df$taglist)){
-        tmp_col <- c(tmp_col, paste(unlist(df$taglist[i]), sep='', collapse=', '))
-        
-      }
-      
-      df$taglist <- tmp_col
     }
   }
   
@@ -221,25 +206,6 @@ final_gaming_postsDF
 
 ### -------------------------------------------------------------------------
 ## Saving the cleaned data
+write.csv(gamedev_postsDF, "./data/csv-files/gamedev_sx_posts_data(raw).csv")
 write.csv(final_gamedev_postsDF, "./data/csv-files/gamedev_sx_posts_data.csv")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
